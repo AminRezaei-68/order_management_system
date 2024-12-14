@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { UserInterface } from '../interfaces/user.interface';
+import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class User extends Document {
