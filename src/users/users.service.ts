@@ -13,19 +13,24 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 
+type UserResponse = Partial<User> & { id: string };
+
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
-  private async hashPassword(password: string) {
+  private async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
     return bcrypt.hash(password, salt);
   }
 
-  async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
-    const user = await this.userModel.findById(userId);
+  async changePassword(
+    userId: string,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    const user = await this.userModel.findById(userId).exec();
     if (!user) {
       throw new NotFoundException(`The user with id: ${userId} is not exist.`);
     }
@@ -38,7 +43,7 @@ export class UsersService {
       throw new UnauthorizedException('Current password is incorrect');
     }
 
-    const hashedPassword = await bcrypt.hashPassword(newPassword);
+    const hashedPassword = await this.hashPassword(newPassword);
     user.password = hashedPassword;
 
     await user.save();
@@ -46,7 +51,24 @@ export class UsersService {
     return { message: 'Password updated successfully' };
   }
 
-  async updateStatus(userId: string, updateUserStatusDto: UpdateUserStatusDto) {
+  async findByUsernameOrEmail(
+    usernameOrEmail: string,
+  ): Promise<UserResponse | undefined> {
+    const user = await this.userModel
+      .findOne({
+        $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
+      })
+      .exec();
+
+    return user
+      ? { id: user._id.toString(), username: user.username, email: user.email }
+      : undefined;
+  }
+
+  async updateStatus(
+    userId: string,
+    updateUserStatusDto: UpdateUserStatusDto,
+  ): Promise<{ message: string }> {
     const user = await this.userModel.findById(userId);
 
     if (!user) {
@@ -64,32 +86,44 @@ export class UsersService {
     };
   }
 
-  async findAll() {
-    return this.userModel.find();
+  async findAll(): Promise<UserResponse[]> {
+    const users = await this.userModel.find().exec();
+
+    return users.map((user) => ({
+      id: user._id.toString(),
+      username: user.username,
+      email: user.email,
+    }));
   }
 
-  async findOne(id: string) {
-    return this.userModel.findById(id);
+  async findOne(id: string): Promise<UserResponse> {
+    const user = await this.userModel.findById(id).exec();
+
+    if (!user) {
+      throw new NotFoundException(`User with ID "${id}" not found.`);
+    }
+
+    return {
+      id: user._id.toString(),
+      username: user.username,
+      email: user.email,
+    };
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<UserResponse> {
     const { email, password, username } = createUserDto;
-    const existingUser = await this.userModel.findOne({ email: email }).exec();
 
-    const existingusername = await this.userModel
-      .findOne({
-        username: username,
-      })
-      .exec();
+    const existingٍEmail = await this.findByUsernameOrEmail(email);
+    const existingUsername = await this.findByUsernameOrEmail(username);
 
-    if (existingusername) {
+    if (existingٍEmail) {
+      throw new BadRequestException('A user with this email already exists.');
+    }
+
+    if (existingUsername) {
       throw new BadRequestException(
         'A user with this username already exists.',
       );
-    }
-
-    if (existingUser) {
-      throw new BadRequestException('A user with this email already exists.');
     }
 
     const hashedPassword = await this.hashPassword(password);
@@ -108,7 +142,10 @@ export class UsersService {
     };
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserResponse> {
     const user = await this.userModel.findById(id).exec();
 
     if (!user) {
@@ -150,7 +187,7 @@ export class UsersService {
     };
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<{ message: string }> {
     const user = await this.userModel.findByIdAndDelete(id);
 
     if (!user) {
