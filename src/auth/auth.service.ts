@@ -29,6 +29,7 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const user = await this.userService.findByUsernameOrEmail(
       loginDto.usernameOrEmail,
+      true,
     );
 
     if (!user) {
@@ -44,6 +45,7 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect password');
     }
 
+    console.log('in auth service - roles:', user.roles);
     const payload = { sub: user.id, roles: user.roles };
     const token = this.jwtService.sign(payload);
     const expiresIn = 3600;
