@@ -53,6 +53,7 @@ export class UsersService {
 
   async findByUsernameOrEmail(
     usernameOrEmail: string,
+    includeSensitiveData: boolean = false,
   ): Promise<UserResponse | undefined> {
     const user = await this.userModel
       .findOne({
@@ -60,9 +61,22 @@ export class UsersService {
       })
       .exec();
 
-    return user
-      ? { id: user._id.toString(), username: user.username, email: user.email }
-      : undefined;
+    if (!user) {
+      return undefined;
+    }
+
+    const userRespone: UserResponse = {
+      id: user._id.toString(),
+      username: user.username,
+      email: user.email,
+      roles: user.roles,
+    };
+
+    if (includeSensitiveData) {
+      userRespone.password = user.password;
+    }
+
+    return userRespone;
   }
 
   async updateStatus(
@@ -107,6 +121,7 @@ export class UsersService {
       id: user._id.toString(),
       username: user.username,
       email: user.email,
+      isActive: user.isActive,
     };
   }
 
