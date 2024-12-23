@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
@@ -20,10 +21,12 @@ export class CreateProductDto {
   @IsOptional()
   description?: string;
 
+  @Type(() => Number)
   @IsNumber()
   @IsPositive()
   price: number;
 
+  @Type(() => Number)
   @IsNumber()
   @IsPositive()
   quantity: number;
@@ -46,7 +49,7 @@ export class CreateProductDto {
   @IsEnum(ProductStatus, {
     each: true,
     message:
-      'status must be either "clothing" or "electronics" or "home_appliances" or "jewelry".',
+      'status must be either "In Stock" or "Out of Stock" or "Active" or "Inactive".',
   })
   status: ProductStatus[];
 }
