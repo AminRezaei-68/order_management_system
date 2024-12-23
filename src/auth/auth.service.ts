@@ -45,7 +45,6 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect password');
     }
 
-    console.log('in auth service - roles:', user.roles);
     const payload = { sub: user.id, roles: user.roles };
     const token = this.jwtService.sign(payload);
     const expiresIn = 3600;
