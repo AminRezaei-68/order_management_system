@@ -7,7 +7,15 @@ export class Cart extends Document {
   @Prop({ required: true })
   userId: string;
 
-  @Prop({ type: [{ type: Object }] })
+  @Prop({
+    type: [
+      {
+        productId: { type: String, require: true },
+        quantity: { type: Number, require: true },
+        price: { type: Number, require: true },
+      },
+    ],
+  })
   items: CartItemDto[];
 }
 
