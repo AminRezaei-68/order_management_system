@@ -1,7 +1,7 @@
 export enum ProductStatus {
-  InStock = 'InStock',
-  OutOfStock = 'OutOfStock',
+  InStock = 'In Stock',
+  OutOfStock = 'Out Of Stock',
   Active = 'Active',
   Inactive = 'Inactive',
-  OnSale = 'OnSale',
+  OnSale = 'On Sale',
 }
