@@ -12,7 +12,7 @@ import { CartsService } from './carts.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 // import { UpdateCartDto } from './dto/update-cart.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth/jwt-auth.guard';
-import { DecrementItemDto } from './dto/dcrement-item.dto';
+import { DecrementItemDto } from './dto/decrement-item.dto';
 
 @ApiTags('carts')
 @Controller('carts')
