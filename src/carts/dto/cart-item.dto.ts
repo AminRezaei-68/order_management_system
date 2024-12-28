@@ -8,8 +8,4 @@ export class CartItemDto {
   @Type(() => Number)
   @IsNumber()
   quantity: number;
-
-  @Type(() => Number)
-  @IsNumber()
-  price: number;
 }
