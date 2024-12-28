@@ -18,6 +18,9 @@ export class Product extends Document {
   @Prop({ type: [String], required: true })
   category: string[];
 
+  @Prop({ default: 0 })
+  reservedQuantity: number;
+
   @Prop()
   brand?: string;
 
