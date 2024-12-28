@@ -7,9 +7,7 @@ export class Cart extends Document {
   @Prop({ required: true })
   userId: string;
 
-  @Prop({
-    type: [{ type: [CartItemSchema], default: [] }],
-  })
+  @Prop({ type: [CartItemSchema], default: [] })
   items: CartItem[];
 }
 
