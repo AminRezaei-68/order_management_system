@@ -9,9 +9,10 @@ import { Cart } from './schemas/cart.schema';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
 import { CreateCartDto } from './dto/create-cart.dto';
-// import { UpdateCartDto } from './dto/update-cart.dto';
 import { Product } from 'src/products/schemas/product.schema';
 import { DecrementItemDto } from './dto/decrement-item.dto';
+import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
+import { OrdersService } from '../orders/orders.service';
 
 @Injectable()
 export class CartsService {
@@ -19,6 +20,7 @@ export class CartsService {
     @InjectModel(Cart.name) private readonly cartModel: Model<Cart>,
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
     @InjectConnection() private readonly connection: Connection,
+    private readonly ordersService: OrdersService,
   ) {}
 
   async checkValidityOfProduct(product, quantity) {
@@ -30,8 +32,10 @@ export class CartsService {
       throw new BadRequestException('Product is not Active.');
     }
 
-    if (product.quantity < quantity) {
-      throw new BadRequestException('Insufficient stock');
+    if (product.reservedQuantity + quantity > product.quantity) {
+      throw new BadRequestException(
+        `Insufficient stock for product ${product.id}. Available: ${product.quantity - product.reservedQuantity}, Requested: ${quantity}`,
+      );
     }
   }
 
@@ -45,6 +49,11 @@ export class CartsService {
         `Product with id ${product.productId} not found.`,
       );
     }
+  }
+
+  async findAll(paginationQueryDto: PaginationQueryDto) {
+    const { offset, limit } = paginationQueryDto;
+    return await this.cartModel.find().skip(offset).limit(limit).exec();
   }
 
   async create(userId: string, createCartDto: CreateCartDto) {
@@ -76,13 +85,10 @@ export class CartsService {
         cart.items.push({ productId, quantity, price: product.price });
       }
 
-      product.quantity -= quantity;
+      product.reservedQuantity += quantity;
 
       await cart.save({ session });
       await product.save({ session });
-
-      await cart.save();
-      await product.save();
 
       await session.commitTransaction();
       session.endSession();
@@ -125,7 +131,7 @@ export class CartsService {
 
       if (item.quantity < decrementAmount) {
         throw new BadRequestException(
-          `Cannot remove ${item.quantity} items. Only ${item.quantity} available in the cart.`,
+          `Cannot remove items. Only ${item.quantity} available in the cart.`,
         );
       }
 
@@ -135,7 +141,7 @@ export class CartsService {
         cart.items.splice(itemIndex, 1);
       }
 
-      product.quantity += decrementAmount;
+      product.reservedQuantity -= decrementAmount;
 
       await cart.save({ session });
       await product.save({ session });
@@ -177,7 +183,7 @@ export class CartsService {
 
       const item = cart.items[itemIndex];
 
-      product.quantity += item.quantity;
+      product.reservedQuantity -= item.quantity;
 
       cart.items.splice(itemIndex, 1);
 
@@ -217,7 +223,7 @@ export class CartsService {
           );
         }
 
-        product.quantity += item.quantity;
+        product.reservedQuantity -= item.quantity;
         await product.save({ session });
       }
 
@@ -229,6 +235,65 @@ export class CartsService {
       throw error;
     } finally {
       session.endSession();
+    }
+  }
+
+  async checkout(cartId, userId) {
+    const session = await this.cartModel.db.startSession();
+    session.startTransaction();
+
+    try {
+      const cart = await this.cartModel.findById(cartId).session(session);
+
+      if (!cart || cart.items.length === 0) {
+        throw new BadRequestException('Your cart is empty');
+      }
+
+      for (const item of cart.items) {
+        const product = await this.productModel
+          .findById(item.productId)
+          .session(session);
+
+        if (!product) {
+          throw new NotFoundException(
+            `Product with id ${item.productId} not found.`,
+          );
+        }
+
+        if (product.quantity < item.quantity) {
+          throw new BadRequestException(
+            `Insufficient stock for product ${product.name}.`,
+          );
+        }
+
+        product.quantity -= item.quantity;
+        product.reservedQuantity -= item.quantity;
+        await product.save({ session });
+      }
+
+      const orderData = {
+        userId,
+        items: cart.items,
+        totalPrice: cart.items.reduce(
+          (sum, item) => sum + item.quantity * item.price,
+          0,
+        ),
+        status: 'Pending',
+        createdAt: new Date(),
+      };
+
+      await this.ordersService.createOrder(orderData, session);
+
+      await this.cartModel.findByIdAndDelete(cart.id).session(session);
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return { message: 'Checkout completed successfully.' };
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
     }
   }
 }
