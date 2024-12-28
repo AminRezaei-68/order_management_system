@@ -18,7 +18,16 @@ export class ProductsService {
 
   async findAll(paginationQueryDto: PaginationQueryDto) {
     const { limit, offset } = paginationQueryDto;
-    return await this.productModel.find().skip(offset).limit(limit).exec();
+    const products = await this.productModel
+      .find()
+      .skip(offset)
+      .limit(limit)
+      .exec();
+
+    return products.map((product) => ({
+      ...product.toObject(),
+      availableQuantity: product.quantity - product.reservedQuantity,
+    }));
   }
 
   async findOne(id: string) {
@@ -32,7 +41,10 @@ export class ProductsService {
       throw new NotFoundException(`The product with ${id} does not exist.`);
     }
 
-    return product;
+    return {
+      ...product.toObject(),
+      availableQuantity: product.quantity - product.reservedQuantity,
+    };
   }
 
   async create(createProductDto: CreateProductDto) {
