@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: order-management-api
+    ports:
+      - '3000:3000'
+    environment:
+      - DATABASE_HOST=mongodb://db:27017/order_management
+    depends_on:
+      - db
+
+  db:
+    image: mongo:6.0
+    container_name: order-management-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: my-secret-pw
+      MONGO_INITDB_DATABASE: order_management
+    ports:
+      - '27017:27017'
+    volumes:
+      - db_data:/data/db
+
+volumes:
+  db_data:
