@@ -23,5 +23,17 @@ services:
     volumes:
       - db_data:/data/db
 
+  test-db:
+    image: mongo:6.0
+    restart: always
+    ports:
+      - '27018:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: test
+      MONGO_INITDB_ROOT_PASSWORD: test-secret-pw
+    volumes:
+      - test_db_data:/data/db
+
 volumes:
   db_data:
+  test_db_data:
