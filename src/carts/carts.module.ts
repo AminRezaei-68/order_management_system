@@ -3,9 +3,9 @@ import { CartsController } from './carts.controller';
 import { CartsService } from './carts.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Cart, CartSchema } from './schemas/cart.schema';
-import { UsersModule } from 'src/users/users.module';
-import { Product, productSchema } from 'src/products/schemas/product.schema';
-import { OrdersModule } from 'src/orders/orders.module';
+import { UsersModule } from '../users/users.module';
+import { Product, productSchema } from '../products/schemas/product.schema';
+import { OrdersModule } from '../orders/orders.module';
 
 @Module({
   imports: [

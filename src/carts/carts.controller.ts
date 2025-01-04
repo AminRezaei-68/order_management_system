@@ -12,9 +12,9 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { CartsService } from './carts.service';
 import { CreateCartDto } from './dto/create-cart.dto';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../common/guards/jwt-auth/jwt-auth.guard';
 import { DecrementItemDto } from './dto/decrement-item.dto';
-import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
+import { PaginationQueryDto } from '../common/dtos/pagination-query.dto';
 
 @ApiTags('carts')
 @Controller('carts')

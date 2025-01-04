@@ -9,8 +9,8 @@ import {
   IsPositive,
   IsString,
 } from 'class-validator';
-import { ProductCategory } from 'src/common/enums/category.enum';
-import { ProductStatus } from 'src/common/enums/status.enum';
+import { ProductCategory } from '../../common/enums/category.enum';
+import { ProductStatus } from '../../common/enums/status.enum';
 
 export class CreateProductDto {
   @IsString()
@@ -51,5 +51,5 @@ export class CreateProductDto {
     message:
       'status must be either "In Stock" or "Out of Stock" or "Active" or "Inactive".',
   })
-  status: ProductStatus[];
+  status: ProductStatus[] = [ProductStatus.InStock];
 }

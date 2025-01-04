@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { CartItem, CartItemSchema } from 'src/carts/schemas/cart-item.schema';
+import { CartItem, CartItemSchema } from '../../carts/schemas/cart-item.schema';
 
 @Schema({ timestamps: true })
 export class Order {

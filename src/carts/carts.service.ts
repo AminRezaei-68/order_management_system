@@ -9,7 +9,7 @@ import { Cart } from './schemas/cart.schema';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
 import { CreateCartDto } from './dto/create-cart.dto';
-import { Product } from 'src/products/schemas/product.schema';
+import { Product } from '../products/schemas/product.schema';
 import { DecrementItemDto } from './dto/decrement-item.dto';
 import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
 import { OrdersService } from '../orders/orders.service';
