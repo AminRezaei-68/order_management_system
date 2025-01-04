@@ -24,10 +24,13 @@ export class ProductsService {
       .limit(limit)
       .exec();
 
-    return products.map((product) => ({
-      ...product.toObject(),
-      availableQuantity: product.quantity - product.reservedQuantity,
-    }));
+    return products.map((product) => {
+      const productObj = product.toObject();
+      return {
+        ...productObj,
+        availableQuantity: productObj.quantity - productObj.reservedQuantity,
+      };
+    });
   }
 
   async findOne(id: string) {
