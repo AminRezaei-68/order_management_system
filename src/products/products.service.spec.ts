@@ -1,263 +1,3 @@
-/* eslint-disable prettier/prettier */
-// import { Test, TestingModule } from '@nestjs/testing';
-// import { getModelToken } from '@nestjs/mongoose';
-// import { ProductsService } from './products.service';
-// import { BadRequestException, NotFoundException } from '@nestjs/common';
-// import { Model, Query } from 'mongoose';
-// import { Product } from './schemas/product.schema';
-// import { CreateProductDto } from './dto/create-product.dto';
-// import { UpdateProductDto } from './dto/update-product.dto';
-// import { ProductCategory } from 'src/common/enums/category.enum';
-// import { ProductStatus } from 'src/common/enums/status.enum';
-
-// describe('ProductsService', () => {
-//   let service: ProductsService;
-//   let model: jest.Mocked<Model<Product>>;
-
-//   const mockProductModel = {
-//     find: jest.fn().mockReturnThis(),
-//     findById: jest.fn().mockReturnThis(),
-//     findByIdAndDelete: jest.fn().mockReturnThis(),
-//     findOne: jest.fn().mockReturnThis(),
-//     create: jest.fn().mockImplementation((dto) => dto),
-//     skip: jest.fn().mockReturnThis(),
-//     limit: jest.fn().mockReturnThis(),
-//     exec: jest.fn().mockResolvedValue([]),
-//   }; /* as unknown as jest.Mocked<Model<Product>> */
-
-//   beforeEach(async () => {
-//     const module: TestingModule = await Test.createTestingModule({
-//       providers: [
-//         ProductsService,
-//         {
-//           provide: getModelToken(Product.name),
-//           useValue: mockProductModel,
-//         },
-//       ],
-//     }).compile();
-
-//     service = module.get<ProductsService>(ProductsService);
-//     model = module.get<jest.Mocked<Model<Product>>>(
-//       getModelToken(Product.name),
-//     );
-//   });
-
-//   it('should be defined', () => {
-//     expect(service).toBeDefined();
-//   });
-
-//   describe('findAll', () => {
-//     it('should return all products with pagination', async () => {
-//       const mockProducts = [
-//         {
-//           name: 'Product 1',
-//           quantity: 10,
-//           reservedQuantity: 2,
-//           toObject: jest.fn().mockReturnValue({
-//             name: 'Product 1',
-//             quantity: 10,
-//             reservedQuantity: 2,
-//           }),
-//         },
-//       ];
-
-//       model.find.mockReturnValue({
-//         skip: jest.fn().mockReturnThis(),
-//         limit: jest.fn().mockReturnThis(),
-//         exec: jest.fn().mockResolvedValue(mockProducts),
-//       } as unknown as jest.Mocked<Query<Product[], Product>>);
-
-//       const paginationQueryDto = { limit: 10, offset: 0 };
-//       const result = await service.findAll(paginationQueryDto);
-
-//       expect(result).toEqual([
-//         {
-//           name: 'Product 1',
-//           quantity: 10,
-//           reservedQuantity: 2,
-//           availableQuantity: 8,
-//         },
-//       ]);
-//       expect(model.find).toHaveBeenCalledTimes(1);
-//     });
-
-//     it('should return an empty array if no products found', async () => {
-//       model.find.mockReturnValue({
-//         skip: jest.fn().mockReturnThis(),
-//         limit: jest.fn().mockReturnThis(),
-//         exec: jest.fn().mockResolvedValue([]),
-//       } as unknown as jest.Mocked<Query<Product[], Product>>);
-
-//       const result = await service.findAll({ limit: 10, offset: 0 });
-
-//       expect(result).toEqual([]);
-//       expect(model.find).toHaveBeenCalledTimes(1);
-//     });
-//   });
-
-//   describe('findOne', () => {
-//     it('should throw BadRequestException for invalid ID', async () => {
-//       await expect(service.findOne('invalid_id')).rejects.toThrow(
-//         BadRequestException,
-//       );
-//     });
-
-//     it('should throw NotFoundException if product does not exist', async () => {
-//       model.findById.mockReturnValue({
-//         exec: jest.fn().mockResolvedValue(null),
-//       } as unknown as jest.Mocked<Query<Product | null, Product>>);
-
-//       await expect(service.findOne('64f3a08b3c7a0d1fcb8a08a8')).rejects.toThrow(
-//         NotFoundException,
-//       );
-//     });
-
-//     it('should return a product', async () => {
-//       const mockProduct = {
-//         name: 'Product 1',
-//         quantity: 10,
-//         reservedQuantity: 2,
-//         toObject: jest.fn().mockReturnValue({
-//           name: 'Product 1',
-//           quantity: 10,
-//           reservedQuantity: 2,
-//         }),
-//       };
-
-//       model.findById.mockReturnValue({
-//         exec: jest.fn().mockResolvedValue(mockProduct),
-//       } as unknown as jest.Mocked<Query<Product, Product>>);
-
-//       const result = await service.findOne('64f3a08b3c7a0d1fcb8a08a8');
-
-//       expect(result).toEqual({
-//         name: 'Product 1',
-//         quantity: 10,
-//         reservedQuantity: 2,
-//         availableQuantity: 8,
-//       });
-//     });
-//   });
-
-//   describe('create', () => {
-//     it('should throw BadRequestException if product with same name and brand exists', async () => {
-//       const createProductDto: CreateProductDto = {
-//         name: 'Product 1',
-//         brand: 'Brand A',
-//         quantity: 10,
-//         category: [ProductCategory.Clothing],
-//         price: 10,
-//         status: [ProductStatus.InStock],
-//       };
-
-//       model.findOne.mockReturnValue({
-//         exec: jest
-//           .fn()
-//           .mockResolvedValue({ name: 'Product 1', brand: 'Brand A' }),
-//       } as unknown as jest.Mocked<Query<Product, Product>>);
-
-//       await expect(service.create(createProductDto)).rejects.toThrow(
-//         BadRequestException,
-//       );
-//     });
-
-//     it('should create a new product', async () => {
-//       const createProductDto: CreateProductDto = {
-//         name: 'Product 1',
-//         brand: 'Brand A',
-//         quantity: 10,
-//         category: [ProductCategory.Clothing],
-//         price: 10,
-//         status: [ProductStatus.InStock],
-//       };
-
-//       model.findOne.mockReturnValue({
-//         exec: jest.fn().mockResolvedValue(null),
-//       } as unknown as jest.Mocked<Query<Product | null, Product>>);
-
-//       model.create.mockImplementation();
-
-//       const result = await service.create(createProductDto);
-
-//       expect(result).toEqual(createProductDto);
-//       expect(model.create).toHaveBeenCalledWith(createProductDto);
-//     });
-//   });
-
-//   describe('update', () => {
-//     it('should throw BadRequestException for invalid ID', async () => {
-//       const updateProductDto: UpdateProductDto = { name: 'Updated Name' };
-//       await expect(
-//         service.update('invalid_id', updateProductDto),
-//       ).rejects.toThrow(BadRequestException);
-//     });
-
-//     it('should throw NotFoundException if product does not exist', async () => {
-//       model.findById.mockImplementation(() => ({
-//         exec: jest.fn().mockResolvedValue(null),
-//       }));
-
-//       await expect(
-//         service.update('64f3a08b3c7a0d1fcb8a08a8', {
-//           name: 'Updated Name',
-//         }),
-//       ).rejects.toThrow(NotFoundException);
-//     });
-
-//     it('should update a product', async () => {
-//       const mockProduct = {
-//         name: 'Product 1',
-//         brand: 'Brand A',
-//         quantity: 10,
-//         reservedQuantity: 2,
-//         save: jest.fn().mockResolvedValue(true),
-//       };
-
-//       model.findById.mockImplementation(() => ({
-//         exec: jest.fn().mockResolvedValue(mockProduct),
-//       }));
-
-//       const updateProductDto: UpdateProductDto = { name: 'Updated Name' };
-//       await service.update('64f3a08b3c7a0d1fcb8a08a8', updateProductDto);
-
-//       expect(mockProduct.name).toBe('Updated Name');
-//       expect(mockProduct.save).toHaveBeenCalled();
-//     });
-//   });
-
-//   describe('remove', () => {
-//     it('should throw BadRequestException for invalid ID', async () => {
-//       await expect(service.remove('invalid_id')).rejects.toThrow(
-//         BadRequestException,
-//       );
-//     });
-
-//     it('should throw NotFoundException if product does not exist', async () => {
-//       model.findByIdAndDelete.mockImplementation(() => ({
-//         exec: jest.fn().mockResolvedValue(null),
-//       }));
-
-//       await expect(service.remove('64f3a08b3c7a0d1fcb8a08a8')).rejects.toThrow(
-//         NotFoundException,
-//       );
-//     });
-
-//     it('should delete a product', async () => {
-//       const mockProduct = { name: 'Product 1' };
-
-//       model.findByIdAndDelete.mockImplementation(() => ({
-//         exec: jest.fn().mockResolvedValue(mockProduct),
-//       }));
-
-//       const result = await service.remove('64f3a08b3c7a0d1fcb8a08a8');
-
-//       expect(result).toEqual({
-//         message: 'Product with ID "64f3a08b3c7a0d1fcb8a08a8" has been deleted.',
-//       });
-//     });
-//   });
-// });
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
 import { getModelToken } from '@nestjs/mongoose';
@@ -266,17 +6,26 @@ import mongoose, { Model, Query } from 'mongoose';
 import { Product } from './schemas/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { v4 as uuidv4 } from 'uuid';
 
 describe('ProductsService', () => {
   let service: ProductsService;
   let productModel: Model<Product>;
+  let mockProductModel: jest.Mock = jest.fn();
   let mockSave: jest.Mock;
+
+  const newId = uuidv4();
+  const existingId = uuidv4();
 
   beforeEach(async () => {
     mockSave = jest.fn().mockResolvedValue({
-      _id: 'new_id',
+      _id: newId,
       name: 'Product1',
       brand: 'Brand1',
+      price: 99,
+      quantity: 10,
+      category: ['electronics'],
+      status: ['In Stock'],
     });
 
     const module: TestingModule = await Test.createTestingModule({
@@ -288,7 +37,7 @@ describe('ProductsService', () => {
             find: jest.fn(),
             findById: jest.fn().mockReturnValue({
               exec: jest.fn().mockResolvedValue({
-                _id: 'existing_id',
+                _id: existingId,
                 name: 'Product1',
                 brand: 'Brand1',
               }),
@@ -300,10 +49,12 @@ describe('ProductsService', () => {
             skip: jest.fn().mockReturnThis(),
             limit: jest.fn().mockReturnThis(),
             exec: jest.fn(),
-            save: mockSave,
-            new: jest.fn().mockImplementation(() => ({
-              save: mockSave,
-            })),
+            create: jest.fn().mockResolvedValue(mockSave),
+            save: jest.fn(),
+            // new: jest.fn().mockImplementation(() => ({
+            //   save: mockProductModel,
+              
+            // })),
           },
         },
       ],
@@ -420,16 +171,29 @@ describe('ProductsService', () => {
         .spyOn(productModel, 'findOne')
         .mockReturnValue({ exec: jest.fn().mockResolvedValue(null) } as any);
 
-      const result = await service.create({
-        name: 'Product1',
-        brand: 'Brand1',
-      } as CreateProductDto);
+        mockProductModel.mockImplementation(() => ({
+          save: jest.fn(),
+          toObject: jest.fn().mockReturnValue(mockSave),
+        }));
+
+        const result = await service.create({
+          name: 'Product1',
+          brand: 'Brand1',
+          price: 99,
+          quantity: 10,
+          category: ['electronics'],
+          status: ['In Stock'],
+        } as CreateProductDto);
 
       expect(mockSave).toHaveBeenCalled();
       expect(result).toEqual({
-        _id: 'new_id',
+        _id: newId,
         name: 'Product1',
         brand: 'Brand1',
+        price: 99,
+        quantity: 10,
+        category: ['electronics'],
+        status: ['In Stock'],
       });
     });
   });
