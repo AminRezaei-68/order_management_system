@@ -12,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
+import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
 
 type UserResponse = Partial<User> & { id: string };
 
@@ -100,8 +101,9 @@ export class UsersService {
     };
   }
 
-  async findAll(): Promise<UserResponse[]> {
-    const users = await this.userModel.find().exec();
+  async findAll(paginationQueryDto: PaginationQueryDto): Promise<UserResponse[]> {
+    const { offset = 0, limit = 10 } = paginationQueryDto;
+    const users = await this.userModel.find().skip(offset).limit(limit).exec();
 
     return users.map((user) => ({
       id: user._id.toString(),
