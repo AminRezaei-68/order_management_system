@@ -17,7 +17,7 @@ export class ProductsService {
   ) {}
 
   async findAll(paginationQueryDto: PaginationQueryDto) {
-    const { limit, offset } = paginationQueryDto;
+    const { limit = 10, offset = 0 } = paginationQueryDto;
     const products = await this.productModel
       .find()
       .skip(offset)

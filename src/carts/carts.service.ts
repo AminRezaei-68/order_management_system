@@ -52,7 +52,7 @@ export class CartsService {
   }
 
   async findAll(paginationQueryDto: PaginationQueryDto) {
-    const { offset, limit } = paginationQueryDto;
+    const { offset = 0, limit = 10 } = paginationQueryDto;
     return await this.cartModel.find().skip(offset).limit(limit).exec();
   }
 
