@@ -1,5 +1,5 @@
 import { IsString, Matches, MinLength } from 'class-validator';
-import { BaseUserDto } from 'src/common/dtos/base-user.dto';
+import { BaseUserDto } from '../../common/dtos/base-user.dto';
 
 export class SignupDto extends BaseUserDto {
   @IsString()

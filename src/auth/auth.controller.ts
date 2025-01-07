@@ -15,7 +15,11 @@ export class AuthController {
   }
 
   @Post('login')
-  login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto) {
+    // return this.authService.login(loginDto);
+    console.log('in auth controller loginDto is:',loginDto);
+    const access_token = await this.authService.login(loginDto);
+    console.log('in auth controller token is:',access_token);
+    return { access_token };
   }
 }
