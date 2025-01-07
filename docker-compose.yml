@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   web:
-    build: .
+    image: order
     container_name: order-management-api
     ports:
       - '3000:3000'
@@ -12,7 +10,7 @@ services:
       - db
 
   db:
-    image: mongo:6.0
+    image: order
     container_name: order-management-db
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -24,7 +22,7 @@ services:
       - db_data:/data/db
 
   test-db:
-    image: mongo:6.0
+    image: order
     restart: always
     ports:
       - '27018:27017'
