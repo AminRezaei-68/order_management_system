@@ -18,6 +18,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { PaginationQueryDto } from 'src/common/dtos/pagination-query.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -27,8 +28,8 @@ export class UsersController {
 
   @Get()
   @Roles('admin')
-  async findAll() {
-    return this.usersService.findAll();
+  async findAll(@Body() paginationQueryDto: PaginationQueryDto) {
+    return this.usersService.findAll(paginationQueryDto);
   }
 
   @Get(':id')
